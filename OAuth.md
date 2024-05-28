@@ -175,7 +175,7 @@
 23. Client ID and Client secret can be found in Realm -> client -> client credentials
 
 
------------------- CODE snippets --------------------
+------------------ CODE SNIPPETS --------------------
 
 24. To make a spring boot component a resource server, add a resource-server dependency:
     	<dependency>
@@ -210,6 +210,64 @@
 
 30. Role based access control
     - Roles are entities having a collection of authorities
-    - Usually roles are defined with name prefixed with ROLE_<NAME>    
 
-31. 
+--------------------------- CODE SNIPPETS --------------------------------------------------------
+
+31. We can filter the request before it reaches the Controller class
+    - We can add conditions like : User must have a specific scope to access an end point
+        @Bean
+        SecurityFilterChain configure(HttpSecurity http) throws Exception {
+            http.authorizeHttpRequests(authz ->
+                            authz
+                                    .requestMatchers(HttpMethod.GET, "/users/status/check").hasAuthority("SCOPE_test")
+                                    .anyRequest()
+                                    .authenticated())
+                    .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> {}));
+            return http.build();
+        }
+
+    - We can add condition like : User must have a role or have one of the following roles
+        @Bean
+        SecurityFilterChain configure(HttpSecurity http) throws Exception {
+            JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+            jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
+
+            http.authorizeHttpRequests(authz ->
+                            authz
+                                    .requestMatchers(HttpMethod.GET, "/users/status/check")
+                                    //.hasRole("developer")
+                                    .hasAnyRole("developer", "tester")
+                                    .anyRequest()
+                                    .authenticated())
+                    .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+            return http.build();
+        }
+
+31. Method/Class level Security
+    - We can add annotations on the class or methods where we define the authority (who can access it)
+    - Need to add @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true) to a configuration class (Any class with @Configuration annotation)
+    - We can use @Secured annotation on a method like
+            @Secured("ROLE_developer")
+            @DeleteMapping(path = "/{id}")
+            public String deleteUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
+                return "Deleted user with id " + id + " and JWT subject " + jwt.getSubject();
+            }
+    - We can use different annotation to do the same thing, the difference is in this annotation we can pass the expression (who can access the method)
+    - Expression example if the user has the given authority or the id passed as a path variable matches the id present in the access token
+
+        @PreAuthorize("hasAuthority('ROLE_developer') or #id == #jwt.subject")
+        @DeleteMapping(path = "/{id}")
+        public String deleteUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
+            return "Deleted user with id " + id + " and JWT subject " + jwt.getSubject();
+        }
+
+32. PostAuthorize annotation
+    - Enable it using the same @EnablemethodSecurity annotation
+        - @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true)
+    - PostAuthorize annotation can be added on top of a method like
+        - @PostAuthorize("returnObject.id == #jwt.subject")
+    - PostAuthorize first immplements the method and then try to satsfy its condition
+    - It has access to the return object of the method
+    
+
+    
