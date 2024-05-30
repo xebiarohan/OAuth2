@@ -1,7 +1,7 @@
-1. OAuth 2.0 -> open authorization version 2
+#### 1. OAuth 2.0 -> open authorization version 2
 
 
-2. OAuth 2.0 Roles
+#### 2. OAuth 2.0 Roles
 
     - Resource owner : A user that is trying to access the information
 
@@ -13,36 +13,36 @@
 
         google, fb and twitter all have a authorization server. we can have our own authorization server as well like keycloak
 
-3. There are 2 types of clients
+#### 3. There are 2 types of clients
     - Confidential
     - Public
 
-4. Conidential clients securely stores client secret key where as there is no key for the public clients
+#### 4. Conidential clients securely stores client secret key where as there is no key for the public clients
 
-5. Both the clients have different ways to authenticate itself with the authentication server
+#### 5. Both the clients have different ways to authenticate itself with the authentication server
 
-6. Access token
+#### 6. Access token
     - When the resource user authenticates the client application using the authentication server. the authentication server provides a access token to the client applicaition
     - Then the client application sends this access token in the request to the resource server to access the data
     - Resource server validates the access token with the authentication server that it is valid and gets the user details from the authentication server
 
-7. There are 2 types of access token
+#### 7. There are 2 types of access token
     - Self container type: Token itself contains the user information that the resource server can use in JSON format
     - Identifier type : used just for the validity of the user, then the resource server can use this token to get the user information from the authorization server. Authorization server stores the mapping of the token with the data to share with the resource
 
-8. Self container token can be divided into 3 sections
+#### 8. Self container token can be divided into 3 sections
     - Header section
     - Payload
     - Signature section
 
-9. OpenID connect
+#### 9. OpenID connect
     - When an client gets authenticate with the authorization server, authorization server does not provide any information about the user to the client application
     - OpenID connect helps in this scenario
     - OpenID connect sits on top of the authorization server makes it Identity provider
     - Authorization server on authentication provides an access token only but with OpenID connect it additionally provides an ID token
     - ID token contains the user information that the client application can use
 
-10. Grant Type
+#### 10. Grant Type
      - It is a way an applicaiton gets an access token
      - Different types of client application uses different types of Grant type to get an access token
      - Types
@@ -55,7 +55,7 @@
         - Implicit Flow Grant type
         - password Grant type - client application collects the user credentials and sends to the authorization server
 
-11. Authorization code Grant
+#### 11. Authorization code Grant
     - When you visit any website and try to login using google or faceboook
     - Client application (website) redirects to the facebook authorization page
     - The request sent to authorization server from client contains few value
@@ -81,7 +81,7 @@
     - User then can request the resource from a resource server with that access token in the request header
     - Resource server validates the access token with the authorization server
 
-12. PKCE enhanced Authorization code Grant
+#### 12. PKCE enhanced Authorization code Grant
     - PKCE - Proof key for code exchange (permounced as Pixie)
     - It is very similar to the authorization_code grant flow, it provides extra level of security
     - It is used for the applications that does not store the client_secret for example javascript single page application
@@ -98,7 +98,7 @@
     - Once the authorization server generates the authorization code then in the subsequent request where we sends the authorization_code back to the authorization server, we need to send code_verifier as well
     - Authorization server validates both the authorization_code and code_verifier enerbefore generating the access_token
 
-13. Generating code verifier value
+#### 13. Generating code verifier value
     - It needs to be a random 33 to 128 character alpha-numeric string
     - Needs to be Base64 encoded
     - Using the SecureRandom class
@@ -107,7 +107,7 @@
         secureRandom.nextBytes(codeVerifier);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeverifier);
 
-14. Generating code challenge value
+#### 14. Generating code challenge value
     - code_challenge = BASE64URL-ENCODE(SHA256(ASII(code_verifier)))
     - code in java
         byte[] bytes = codeVerifier.getBytes("US-ASCII");
@@ -116,7 +116,7 @@
         byte[] digent = messageDigest.digest();
         return Base64.getUrlEncoder().pwithoutPadding().encodeToString(digest);
     
-15. Client credentials Grant
+#### 15. Client credentials Grant
     - Used when one application needs to send request to another application
     - No user involved, no login page
     - Machine to machine communication example two microserices
@@ -128,7 +128,7 @@
         - client_id=<client-id>
         - client_secret=<client-secret>
 
-16. Password Grant
+#### 16. Password Grant
     - Should only be used when client application does not support redirect
     - If the application is secure and user is ready to share the credentials with the client application
     - Flow
@@ -142,53 +142,53 @@
                 - client_secret=<client-secret>
         - The authorization server on validation shares access token with the client application
 
-17. Refreshing token
+#### 17. Refreshing token
     - There is a TTL associated with every token
     - grant_type should be refresh_token
     - When the access token gets expired, the client application sends a new request to the authorization server with the refresh token it has to get a new access token
     - Authorization server returns an access token and optioanlly a new refresh token
-   - There are 2 types of refresh token
+    - There are 2 types of refresh token
         - With an expiration time, that expires
         - Without an expiration time, never expires (in this case the expires_in time will be 0)
         - Need to add "offline_access" in scope to get a refresh token that never expires
 
-18. Keycloak
+#### 18. Keycloak
     - Open source Identity and access management solution 
     - Supports Single-Sign On (SSO)    
     - Social login (Facebook, twitter, etc)
     - User federation (LDAP)
  
-19. Download key clock
+#### 19. Download key clock
  
-20. Start kekcloak from bin folder sh ./kc.sh start-dev (development-mode)
+#### 20. Start kekcloak from bin folder sh ./kc.sh start-dev (development-mode)
     - In development mode - sh ./kc.sh start-dev
     - In Production mode - sh ./kc.sh start
     - to run on a different port sh ./kc.sh start-dev --http-port=8081 (default is 8080)
  
-21. Create an admin user on the front page of the keycloak
+#### 21. Create an admin user on the front page of the keycloak
  
-22. Creating a new Realm
+#### 22. Creating a new Realm
     - Reams is a section where we can define a set of users, their roles and their credentials
     - we can have multiple realm in an authorization server
     - a new realm is created from the side menu by clicking on the master realm -> create new realm button
 
-23. Client ID and Client secret can be found in Realm -> client -> client credentials
+#### 23. Client ID and Client secret can be found in Realm -> client -> client credentials
 
 
 ------------------ CODE SNIPPETS --------------------
 
-24. To make a spring boot component a resource server, add a resource-server dependency:
+#### 24. To make a spring boot component a resource server, add a resource-server dependency:
     	<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 
-25. Not by default every end point of the component will expect an access token in all the rest endpoint request, if not present will fail with error 401 Unauthorized
+#### 25. Not by default every end point of the component will expect an access token in all the rest endpoint request, if not present will fail with error 401 Unauthorized
 
-26. To attach an authorization server with the resource server, add an authorization server path in the config file like
+#### 26. To attach an authorization server with the resource server, add an authorization server path in the config file like
     spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://localhost:8080/realms/appsdeveloperblog/protocol/openid-connect/certs
 
-27. To access a JWT token in the resource server or to return the content of it use AuthenticationPrincipal annotation
+#### 27. To access a JWT token in the resource server or to return the content of it use AuthenticationPrincipal annotation
     It will populte the Jwt object with the content of the token and that we can use to see token and claims
 
         @GetMapping("/token")
@@ -196,11 +196,11 @@
             return Collections.singletonMap("principal", jwt);
         }
 
-28. To send a valid request to the resource server add a header "Authorization" as key with "Bearer <access-token>" as value       
+#### 28. To send a valid request to the resource server add a header "Authorization" as key with "Bearer <access-token>" as value       
 
 ---------------------------------------------------------------------------------------------------------
 
-29. Scope based access control
+#### 29. Scope based access control
     - Scope decides the information that the authorization server will share with the resource-server through the access token
     - scope openId means the client application is requesting an ID_token with the access token
     - profile means the client application is requesting the user profile like username, lastname, given_name, gender, website, etc
@@ -208,12 +208,12 @@
     - other scopes are phone, address, offline_access (refresh token with no expiration date)
     - we can have custom scopes as well
 
-30. Role based access control
+#### 30. Role based access control
     - Roles are entities having a collection of authorities
 
 --------------------------- CODE SNIPPETS --------------------------------------------------------
 
-31. We can filter the request before it reaches the Controller class
+#### 31. We can filter the request before it reaches the Controller class
     - We can add conditions like : User must have a specific scope to access an end point
         @Bean
         SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -243,7 +243,7 @@
             return http.build();
         }
 
-31. Method/Class level Security
+#### 32. Method/Class level Security
     - We can add annotations on the class or methods where we define the authority (who can access it)
     - Need to add @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true) to a configuration class (Any class with @Configuration annotation)
     - We can use @Secured annotation on a method like
@@ -261,7 +261,7 @@
             return "Deleted user with id " + id + " and JWT subject " + jwt.getSubject();
         }
 
-32. PostAuthorize annotation
+#### 33. PostAuthorize annotation
     - Enable it using the same @EnablemethodSecurity annotation
         - @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true)
     - PostAuthorize annotation can be added on top of a method like
