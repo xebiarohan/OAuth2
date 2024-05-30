@@ -71,12 +71,14 @@
         <redirect-uri>?code=34dwsw3as&state=asdq23421dassad
     - Then the client application sends a new request to the authorization server with the authorization code to get the access token
     - Request structure
+```
         - POST https://blabla.com/token
             ?grant_type=authorization_code
             &code=<Same-code-as-we-received>
             &redirect_uri=<same-as-the-first-request>
             &client_id=<client-id>
             &client_secret=<client-secret>
+```
     - Authorization server responds with an access token and a refresh token
     - User then can request the resource from a resource server with that access token in the request header
     - Resource server validates the access token with the authorization server
@@ -87,10 +89,13 @@
     - It is used for the applications that does not store the client_secret for example javascript single page application
     - In the initial request to the authorization server from the client application, we needs to send 2 extra query params
     - Request structure
+```
+
         - GET type of request
-        - ----- all parameters as the authorization_code -----
+        - ----- all parameters same as the authorization_code -----
         - ?code_challenge=<base-64 encryped-value> : Client application generates it
-        - ?code_challenge_method=S256 : needs to be configured in the authorization server (s256 is recommeded value)
+        - &code_challenge_method=S256 : needs to be configured in the authorization server (s256 is recommeded value)
+```
     - To generate the code_challenge value, the client application first needs to generate the code_verifier value and from that it derives the code_challenge value
     - code_challenge_method can have 2 different value : S256 or plain 
         - S256 - related to the encrytion of the code_challenge value
@@ -110,11 +115,13 @@
 #### 14. Generating code challenge value
     - code_challenge = BASE64URL-ENCODE(SHA256(ASII(code_verifier)))
     - code in java
+```
         byte[] bytes = codeVerifier.getBytes("US-ASCII");
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(bytes,0,bytes.length);
         byte[] digent = messageDigest.digest();
         return Base64.getUrlEncoder().pwithoutPadding().encodeToString(digest);
+```
     
 #### 15. Client credentials Grant
     - Used when one application needs to send request to another application
@@ -122,11 +129,13 @@
     - Machine to machine communication example two microserices
     - Client application directly sends the request for access token to authorization server
     - Request
+```    
         - POST request with headers defined below
         - grant_type="client_credentials"
         - scope=<scope>
         - client_id=<client-id>
         - client_secret=<client-secret>
+```
 
 #### 16. Password Grant
     - Should only be used when client application does not support redirect
@@ -178,10 +187,12 @@
 ------------------ CODE SNIPPETS --------------------
 
 #### 24. To make a spring boot component a resource server, add a resource-server dependency:
+```
     	<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-		</dependency>
+	</dependency>
+```
 
 #### 25. Not by default every end point of the component will expect an access token in all the rest endpoint request, if not present will fail with error 401 Unauthorized
 
@@ -190,11 +201,12 @@
 
 #### 27. To access a JWT token in the resource server or to return the content of it use AuthenticationPrincipal annotation
     It will populte the Jwt object with the content of the token and that we can use to see token and claims
-
+```
         @GetMapping("/token")
         public Map<String, Object> getToken(@AuthenticationPrincipal Jwt jwt) {
             return Collections.singletonMap("principal", jwt);
         }
+```
 
 #### 28. To send a valid request to the resource server add a header "Authorization" as key with "Bearer <access-token>" as value       
 
@@ -215,6 +227,7 @@
 
 #### 31. We can filter the request before it reaches the Controller class
     - We can add conditions like : User must have a specific scope to access an end point
+```    
         @Bean
         SecurityFilterChain configure(HttpSecurity http) throws Exception {
             http.authorizeHttpRequests(authz ->
@@ -225,8 +238,10 @@
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> {}));
             return http.build();
         }
+```
 
     - We can add condition like : User must have a role or have one of the following roles
+```
         @Bean
         SecurityFilterChain configure(HttpSecurity http) throws Exception {
             JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
@@ -242,30 +257,38 @@
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
             return http.build();
         }
+```
 
 #### 32. Method/Class level Security
     - We can add annotations on the class or methods where we define the authority (who can access it)
     - Need to add @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true) to a configuration class (Any class with @Configuration annotation)
     - We can use @Secured annotation on a method like
+```
             @Secured("ROLE_developer")
             @DeleteMapping(path = "/{id}")
             public String deleteUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
                 return "Deleted user with id " + id + " and JWT subject " + jwt.getSubject();
             }
+```
     - We can use different annotation to do the same thing, the difference is in this annotation we can pass the expression (who can access the method)
     - Expression example if the user has the given authority or the id passed as a path variable matches the id present in the access token
-
+```
         @PreAuthorize("hasAuthority('ROLE_developer') or #id == #jwt.subject")
         @DeleteMapping(path = "/{id}")
         public String deleteUser(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
             return "Deleted user with id " + id + " and JWT subject " + jwt.getSubject();
         }
+```
 
 #### 33. PostAuthorize annotation
     - Enable it using the same @EnablemethodSecurity annotation
+```    
         - @EnableMethodSecurity(securedEnabled=true, prePostEnabled=true)
+```
     - PostAuthorize annotation can be added on top of a method like
+```
         - @PostAuthorize("returnObject.id == #jwt.subject")
+```
     - PostAuthorize first immplements the method and then try to satsfy its condition
     - It has access to the return object of the method
     
