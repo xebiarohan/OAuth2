@@ -1,3 +1,4 @@
-resource-server/.mvn/
-resource-server/mvnw
-resource-server/mvnw.cmd
+*/.mvn/
+*/mvnw
+*/mvnw.cmd
+.idea/
