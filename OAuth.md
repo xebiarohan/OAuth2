@@ -291,6 +291,54 @@
 ```
     - PostAuthorize first immplements the method and then try to satsfy its condition
     - It has access to the return object of the method
-    
+
+#### 34. Eureka discovery
+    - Helps discover different components of the application
+    - Finding the IP address and port numbers
+    - Each component register itself in Eureka
+    - There is an another component between the client and the Eureka that is API Gateway
+    - Cliend sends the request to API gateway, API gateway fetches address of all the components from Eureka
+    - Then it redirects the request to right component
+    - API gateway also works as a load balancer
+
+#### 35. Creating Eureka Service discovery component
+    - First create a new component with Eureka server and Eureka Client dependencies
+
+```
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+```
+    - Then in the Application Elecutable class add @EnableEurekaServer annotaiton
+    - If we have a single instance of Eureka then add the below config
+
+``` 
+        eureka.client.registerWithEureka=false
+        eureka.client.fetchRegistry=false
+
+        logging.level.com.netflix.eureka=OFF
+        logging.level.com.netflix.discovery=OFF   
+```
+
+#### 36. Regisering a component in Eureka Service discovery
+    - Each component that gets registered in Eureka is a client for Eureka discovery service
+    - Need to add Eureka client dependency
+```
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+```        
+    - Add @EnableDiscoveryClient in the application main class
+    - Update the property file to pass the Eureka Discovery service end point
+
+```
+    eureka.client.serviceUrl.defaultZone = http://localhost:8010/eureka
+```
 
     
