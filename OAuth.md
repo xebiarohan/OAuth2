@@ -340,5 +340,26 @@
 ```
     eureka.client.serviceUrl.defaultZone = http://localhost:8010/eureka
 ```
+#### 37. Load balancer
+    - So we can run multiple instances of a resource server
+    - all the resource server will regiter them selves on the Eureka server
+    - Spring cloud API gateway can fetch all the registered resource servers from the Eureka server
+    - And can behave as a load balancer client (it will pass the incoming requests to resource servers)
+
+#### 38. Runnning multiple instances of same component
+    - Server port number must be different for each instance
+    - So we have to give random port numbers to each instances (dont know how many instances will be created)
+    - to start instance on random port 
+        - server.port=0
+
+
+#### 39. Registering multiple instances of same component in Eureka
+    - Need to provide Eureka instance id in all the clients (resource servers)
+        eureka.instance.instance-id = ${spring.application.name}:${instanceId:${random.value}}
+    - We can run from intelliJ or from terminal like
+        - mvn spring-boot:run -Dspring-boot.run.arguments=--instanceId=abc
+
+#### Configuring API gateway to fetch data from Eureka
+    - Need to configure it as Eureka client (just like any resource server)
 
     
