@@ -363,3 +363,16 @@
     - Need to configure it as Eureka client (just like any resource server)
 
     
+#### Client application
+    - To fetch the id token details in one of the controller class we can add the following in a method
+        - @AuthenticationPrincipal OidcUser principal
+
+```
+    @GetMapping("/albums")
+    public String getAlbums(Model model, @AuthenticationPrincipal OidcUser principal) {
+
+        OidcIdToken idToken = principal.getIdToken();
+        String tokenValue = idToken.getTokenValue();
+    }
+```    
+    - Need to update the configuration of the client application as mentioned in the photo-app-web-client application
