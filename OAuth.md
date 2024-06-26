@@ -376,3 +376,51 @@
     }
 ```    
     - Need to update the configuration of the client application as mentioned in the photo-app-web-client application
+
+#### Web Client 
+    - Web client from spring webflux can be used to send the requests from the client with access token to resource servers
+    - Need to add dependencies of that
+```
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webflux</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+		</dependency>
+```
+    - Need to create a bean of Web client in main application java class to add the access token to all the requests
+```
+	@Bean
+	public WebClient webClient(ClientRegistrationRepository clientRegistrationrepository,
+							   OAuth2AuthorizedClientRepository oAuth2AuthorizedClientRepository) {
+		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 =
+				new ServletOAuth2AuthorizedClientExchangeFilterFunction(clientRegistrationrepository,
+						oAuth2AuthorizedClientRepository);
+
+		oauth2.setDefaultOAuth2AuthorizedClient(true);
+
+		return WebClient.builder().apply(oauth2.oauth2Configuration()).build();
+	}
+```
+    - Now autowire it in controller class and use the webclient to send requests
+```
+    @Autowired
+    WebClient webClient;
+
+
+    @GetMapping("/albums")
+    public String getAlbums(Model model, @AuthenticationPrincipal OidcUser principal) {
+
+        String url = "http://localhost:8099/albums";
+
+        List<AlbumsDto> albums = webClient.get().uri(url).retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<AlbumsDto>>(){}).block();
+
+        model.addAttribute("albums", albums);
+        return "albums";
+    }
+
+```
