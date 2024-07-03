@@ -424,3 +424,88 @@
     }
 
 ```
+
+#### OAuth 2.0 Social login
+    - First create a component as a OAuth2 client 
+    - With main dependency
+```
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+```
+    - when we add OAuth2 client dependency, by default all the controller class needs an access token to 
+    allow excess to the end point but we can override this using WebSecurityConfigurationAdapter
+    (check code of WebSecurity.java class in social-login-webclient)
+    - we dont need to provide providers details for google, fb as they are well known (endpoints in application.properties)
+    - we have to provide the client-id and client secret of the identity server
+        -like for google
+```
+spring.security.oauth2.client.registration.google.client-id =  
+spring.security.oauth2.client.registration.google.client-secret =  
+```
+        - for facebook
+```
+spring.security.oauth2.client.registration.facebook.client-id =  
+spring.security.oauth2.client.registration.facebook.client-secret =  
+
+```
+
+    - to get the client-if and client-secret from say facebook
+        - need to login in developer.facebook.com
+        - Go to MyApps
+        - Create an App
+        - Select option "For everything else"
+        - then go inside the newly created App
+        - Go to settings
+        - there App Id and App Secret can be found
+    - to get it from google
+        - need to login in https://console.cloud.google.com/welcome?project=lunar-ensign-136404
+
+#### Okta
+    - It is also an access and Identity provider
+    - It is a cloud based solution as compare to KeyKloak that is a opensource solution (docker based)
+
+#### Implementing logout
+    - Need to set the redirect path and session. authentication setting like:
+
+```
+  @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.authorizeHttpRequests(authorizeRequests ->
+                            authorizeRequests
+                                    .requestMatchers(new AntPathRequestMatcher("/"))
+                                    .permitAll()
+                                    .anyRequest()
+                                    .authenticated()
+                    )
+                    .oauth2Login(Customizer.withDefaults())
+                    .logout(logout -> logout
+                            .logoutSuccessHandler(oidcLogoutSuccessHandler())
+                            .invalidateHttpSession(true)
+                            .clearAuthentication(true)
+                            .deleteCookies("JSESSIONID")
+                    );
+
+            return http.build();
+        }
+
+        private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
+            OidcClientInitiatedLogoutSuccessHandler successHandler = new OidcClientInitiatedLogoutSuccessHandler(
+                    clientRegistrationRepository);
+            successHandler.setPostLogoutRedirectUri("http://localhost:8099/");
+            return successHandler;
+        }
+```
+    - Here we are setting to clear the session, authenticated user and adding the redirect URL to be called on logout
+    - we can provide an endpoint on GUI with "/logout" and the OAuth will map the logout to this method
+```
+        <div>
+            <a href="/logout">Logout</a>
+        </div>
+```
